@@ -1,0 +1,12 @@
+# Co-worker's profile photo — fetch fresh, don't commit
+jds_avatar.png
+
+# zxbc / Python build artifacts
+__pycache__/
+*.pyc
+*.bin
+*.lst
+*.asm
+
+# macOS
+.DS_Store

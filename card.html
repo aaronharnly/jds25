@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>JDS — Level 25</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a1f;
+    --fg: #f8f8f8;
+    --accent: #fcd34d;
+    --pink: #ff5fa2;
+    --cyan: #5fe7ff;
+    --green: #7bd66b;
+    --red: #e84545;
+    --shadow: #1a1a3a;
+    --pixel: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Press Start 2P', monospace;
+    min-height: 100vh;
+    image-rendering: pixelated;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  body {
+    background-image:
+      radial-gradient(circle at 12% 18%, #fff 1px, transparent 1px),
+      radial-gradient(circle at 78% 33%, #fff 1px, transparent 1px),
+      radial-gradient(circle at 24% 67%, #fff 1px, transparent 1px),
+      radial-gradient(circle at 88% 80%, #fff 1px, transparent 1px),
+      radial-gradient(circle at 55% 45%, #fff 1px, transparent 1px),
+      radial-gradient(circle at 40% 92%, #fff 1px, transparent 1px),
+      radial-gradient(circle at 65% 12%, #fff 1px, transparent 1px),
+      radial-gradient(circle at 92% 60%, #fff 1px, transparent 1px),
+      linear-gradient(180deg, #050514 0%, #0a0a1f 60%, #1a0a2e 100%);
+    background-size: 400px 400px, 350px 350px, 300px 300px, 450px 450px, 500px 500px, 250px 250px, 380px 380px, 420px 420px, 100% 100%;
+    padding: 40px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* CRT scanlines */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0.18) 3px,
+      rgba(0, 0, 0, 0.18) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.55) 100%);
+    pointer-events: none;
+    z-index: 1001;
+  }
+
+  .card {
+    position: relative;
+    width: 100%;
+    max-width: 760px;
+    background: #0d0d24;
+    color: var(--fg);
+    padding: 32px 28px 26px;
+    box-shadow:
+      0 0 0 var(--pixel) #0d0d24,
+      0 0 0 calc(var(--pixel) * 2) var(--fg),
+      0 0 0 calc(var(--pixel) * 3) #0d0d24,
+      0 0 0 calc(var(--pixel) * 4) var(--accent),
+      0 12px 0 calc(var(--pixel) * 4) rgba(0,0,0,0.6);
+    z-index: 2;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 4px dashed #2a2a4a;
+    padding-bottom: 14px;
+    margin-bottom: 22px;
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: #9a9ac0;
+  }
+  .header .right { color: var(--green); }
+
+  h1 {
+    font-size: 22px;
+    line-height: 1.4;
+    color: var(--accent);
+    text-shadow: 4px 4px 0 var(--shadow), 4px 4px 0 var(--red);
+    margin-bottom: 6px;
+  }
+  h1 .small { display: block; font-size: 11px; color: var(--cyan); margin-top: 10px; text-shadow: 2px 2px 0 var(--shadow); }
+
+  .blink {
+    animation: blink 1.1s steps(2, end) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .marquee-wrap { overflow: hidden; margin: 18px 0 22px; border-top: 3px solid #2a2a4a; border-bottom: 3px solid #2a2a4a; padding: 10px 0; }
+  .marquee { white-space: nowrap; animation: scroll 22s linear infinite; font-size: 11px; color: var(--pink); }
+  @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+
+  .stage {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 28px;
+    align-items: center;
+    margin: 6px 0 22px;
+  }
+  @media (max-width: 600px) {
+    .stage { grid-template-columns: 1fr; justify-items: center; }
+  }
+
+  /* Pixel art sprite — bearded scholar with glasses */
+  .sprite {
+    position: relative;
+    width: 144px;
+    height: 144px;
+    flex-shrink: 0;
+  }
+  .sprite svg { width: 100%; height: 100%; image-rendering: pixelated; shape-rendering: crispEdges; }
+
+  .stats {
+    font-size: 10px;
+    line-height: 2;
+    color: var(--fg);
+  }
+  .stats .row { display: flex; gap: 10px; }
+  .stats .label { color: var(--cyan); min-width: 130px; }
+  .stats .val { color: var(--fg); }
+  .stats .val.warn { color: var(--red); }
+  .stats .val.good { color: var(--green); }
+  .stats .dots { flex: 1; color: #2a2a4a; overflow: hidden; letter-spacing: 4px; }
+
+  .hp {
+    margin: 4px 0 22px;
+    font-size: 10px;
+  }
+  .hp .label { color: var(--cyan); margin-bottom: 8px; display: block; }
+  .hp .hearts { font-size: 18px; line-height: 1.1; color: var(--red); letter-spacing: 2px; word-break: break-all; }
+
+  .scroll {
+    background: #050514;
+    border: 3px solid var(--accent);
+    padding: 18px 16px;
+    font-family: 'VT323', monospace;
+    font-size: 21px;
+    line-height: 1.45;
+    color: #d8d8f0;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .scroll::before {
+    content: '> SYSTEM MESSAGE';
+    position: absolute;
+    top: -11px; left: 12px;
+    background: #0d0d24;
+    color: var(--accent);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    padding: 2px 8px;
+  }
+  .scroll p + p { margin-top: 10px; }
+  .scroll .quote { color: var(--pink); font-style: italic; }
+  .scroll .sig { color: var(--green); margin-top: 14px; }
+
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: 9px;
+    color: #6a6a90;
+    border-top: 4px dashed #2a2a4a;
+    padding-top: 14px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .footer .press { color: var(--accent); }
+  .footer .esc { color: #9a9ac0; }
+</style>
+</head>
+<body>
+  <main class="card" role="main" aria-label="Anniversary card for JDS">
+
+    <div class="header">
+      <span>★ AMPLIFY ENT. SYSTEM ★</span>
+      <span class="right">2001 — 2026</span>
+    </div>
+
+    <h1>
+      PLAYER 1: JDS
+      <span class="small blink">▶ LEVEL 25 ATTAINED ◀</span>
+    </h1>
+
+    <div class="marquee-wrap" aria-hidden="true">
+      <div class="marquee">
+        ✦ TWENTY-FIVE YEARS ✦ ZERO TOLERANCE FOR POMP ✦ B.S. DETECTOR: MAX ✦ ERUDITION: OVERFLOW ✦ ATTENTION SOUGHT: NONE ✦ STILL HERE ✦
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="sprite" aria-hidden="true">
+        <!-- Bearded scholar sprite: 16x16 grid scaled up -->
+        <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+          <!-- palette -->
+          <!-- skin: #f1c8a5  hair/beard: #b0a090  glasses: #1a1a1a  shirt: #5a4a8a  sweater: #2d3a6e  bg: transparent -->
+          <g shape-rendering="crispEdges">
+            <!-- hair top -->
+            <rect x="4" y="1" width="8" height="1" fill="#9a8a78"/>
+            <rect x="3" y="2" width="10" height="1" fill="#9a8a78"/>
+            <rect x="3" y="3" width="2" height="1" fill="#9a8a78"/>
+            <rect x="11" y="3" width="2" height="1" fill="#9a8a78"/>
+            <!-- forehead -->
+            <rect x="5" y="3" width="6" height="1" fill="#f1c8a5"/>
+            <rect x="4" y="4" width="8" height="1" fill="#f1c8a5"/>
+            <!-- eyes / glasses -->
+            <rect x="3" y="5" width="3" height="2" fill="#1a1a1a"/>
+            <rect x="10" y="5" width="3" height="2" fill="#1a1a1a"/>
+            <rect x="6" y="6" width="4" height="1" fill="#1a1a1a"/>
+            <rect x="4" y="6" width="1" height="1" fill="#cfe9ff"/>
+            <rect x="11" y="6" width="1" height="1" fill="#cfe9ff"/>
+            <!-- nose -->
+            <rect x="7" y="7" width="2" height="1" fill="#d6a888"/>
+            <!-- beard -->
+            <rect x="4" y="8" width="8" height="1" fill="#b0a090"/>
+            <rect x="3" y="9" width="10" height="1" fill="#b0a090"/>
+            <rect x="3" y="10" width="10" height="1" fill="#b0a090"/>
+            <rect x="6" y="10" width="4" height="1" fill="#3a2e2a"/>
+            <rect x="4" y="11" width="8" height="1" fill="#b0a090"/>
+            <rect x="5" y="12" width="6" height="1" fill="#b0a090"/>
+            <!-- sweater -->
+            <rect x="2" y="13" width="12" height="1" fill="#2d3a6e"/>
+            <rect x="1" y="14" width="14" height="2" fill="#2d3a6e"/>
+            <rect x="6" y="13" width="4" height="1" fill="#1a2350"/>
+            <!-- 25 patch -->
+            <rect x="11" y="14" width="3" height="1" fill="#fcd34d"/>
+            <rect x="11" y="15" width="3" height="1" fill="#fcd34d"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="stats" aria-label="Character stats">
+        <div class="row"><span class="label">CLASS</span><span class="val">ERUDITE CURMUDGEON</span></div>
+        <div class="row"><span class="label">ALIGNMENT</span><span class="val">CHAOTIC SKEPTICAL</span></div>
+        <div class="row"><span class="label">YEARS LOGGED</span><span class="val good">25 / 25</span></div>
+        <div class="row"><span class="label">B.S. DETECTOR</span><span class="val warn">██████████ MAX</span></div>
+        <div class="row"><span class="label">POMP TOLERANCE</span><span class="val warn">░░░░░░░░░░ 0</span></div>
+        <div class="row"><span class="label">SPECIAL MOVE</span><span class="val">THE METAMORPHOSIS</span></div>
+      </div>
+    </div>
+
+    <div class="hp">
+      <span class="label">HP — TWENTY-FIVE YEARS OF SERVICE</span>
+      <div class="hearts">♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥ ♥</div>
+    </div>
+
+    <div class="scroll">
+      <p>&gt; A wild milestone appears.</p>
+      <p>Twenty-five years of skeptical inquiry, careful measurement,
+         and the steady refusal of nonsense. You note, with concern,
+         that you are <span class="quote">"from the mesozoic."</span> The data does not contradict you.
+         The data is grateful.</p>
+      <p>We are aware that you <span class="quote">"seek not attention."</span>
+         This card was generated against your express wishes
+         by the stupid system. It will not be the last indignity.</p>
+      <p class="sig">— Roll credits. Stay erudite. No fanfare.</p>
+    </div>
+
+    <div class="footer">
+      <span class="press blink">▶ PRESS START</span>
+      <span>© AMPLIFY 2001 — 2026</span>
+      <span class="esc">[ESC] DISMISS</span>
+    </div>
+  </main>
+</body>
+</html>
