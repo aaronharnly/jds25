@@ -20,40 +20,78 @@ scr_data:
 scr_after:
 END ASM
 
-REM ---- Stats panel (rows 16..22) ----
+REM ---- Hold the splash on its own for ~4 seconds ----
+PAUSE 200
+
+REM ---- BOOT-STYLE SELF-CHECK ----
 PAPER 0: BRIGHT 1
 
-INK 5: PRINT AT 16, 1; "CLASS"; : INK 7: PRINT "   : "; : INK 6: PRINT "ERUDITE CURMUDGEON"
-INK 5: PRINT AT 17, 1; "TONGUES"; : INK 7: PRINT " : "; : INK 6: PRINT "LISP, FORTH, NOT JVM"
-INK 5: PRINT AT 18, 1; "TROPHIES"; : INK 7: PRINT ": "; : INK 4: PRINT "LONGEST-LIVED SCHEMA"
-INK 4: PRINT AT 19, 12; "INVENTOR OF ODDITIES"
-INK 4: PRINT AT 20, 12; "DEEPEST THINKER"
-INK 3: PRINT AT 21, 4; CHR$(34); "I SEEK NOT ATTENTION"; CHR$(34)
+INK 6: PRINT AT 16, 0; "> SELFCHECK..."
+PAUSE 35
 
-REM ---- A short ascending tune. Thoughtful, not triumphant. ----
-BEEP 0.07, -5
-BEEP 0.07,  0
-BEEP 0.07,  4
-BEEP 0.07,  7
-BEEP 0.30, 12
+INK 7: PRINT AT 17, 2; "POMP DETECTOR ";
+GOSUB 9000
+INK 2: PRINT "FAIL"
+BEEP 0.05, -12
 
-REM ---- Marquee on row 23 ----
-DIM m AS STRING
-LET m = "   *   TWENTY-FIVE YEARS   *   FROM THE MESOZOIC   *   THINGS WORK ON THE FIRST TRY, WITH STRANGELY HIGH FREQUENCY   *   NO POMP. NO FANFARE. JUST OBJECTS THAT OUTLIVE THE SCHEMA.   "
-DIM mm AS STRING
-LET mm = m + m
+INK 7: PRINT AT 18, 2; "B.S. DETECTOR ";
+GOSUB 9000
+INK 4: PRINT " OK "
+BEEP 0.05, 4
 
-DIM i AS UInteger
-DIM L AS UInteger
-LET L = LEN(m)
+INK 7: PRINT AT 19, 2; "LISP CORE     ";
+GOSUB 9000
+INK 6: PRINT " HOT"
+BEEP 0.05, 8
 
-INK 7: BRIGHT 0
+INK 7: PRINT AT 20, 2; "JVM           ";
+GOSUB 9000
+INK 2: PRINT "WONTFIX"
+BEEP 0.05, -18
+
+INK 7: PRINT AT 21, 2; "SCHEMA OBJET  ";
+GOSUB 9000
+INK 4: PRINT " v25"
+BEEP 0.05, 7
+
+INK 7: PRINT AT 22, 2; "ODDITY GEN.   ";
+GOSUB 9000
+INK 5: PRINT " INF"
+BEEP 0.05, 10
+
+REM ---- The Spectrum thinks, then states a fact. ----
+PAUSE 80
+
+INK 7: PRINT AT 23, 0; "> ";
+INK 7: FLASH 1: PRINT "_";: FLASH 0
+PAUSE 150
+
+REM Erase the cursor, then type the line one char at a time.
+PRINT AT 23, 2; " ";
+
+DIM line$ AS STRING
+LET line$ = "STILL HERE."
+DIM j AS UByte
+INK 6
+FOR j = 1 TO LEN(line$)
+    PRINT AT 23, 1 + j; line$(j TO j)
+    BEEP 0.01, 6
+    PAUSE 6
+NEXT j
+
+REM Final cursor that blinks via the FLASH attribute, forever.
+INK 6: FLASH 1: PRINT AT 23, 2 + LEN(line$); "_"
+FLASH 0
+
+REM Sit. Don't loop. Don't summon attention.
 DO
-    FOR i = 1 TO L
-        PRINT AT 23, 0; mm(i TO i + 31)
-        PAUSE 3
-        IF INKEY$ <> "" THEN EXIT DO
-    NEXT i
+    PAUSE 50
 LOOP
 
-PAUSE 0
+REM ---- subroutine: animate 9 dots ----
+9000 FOR k = 1 TO 9
+    PRINT ".";
+    PAUSE 2
+NEXT k
+PRINT " ";
+RETURN
