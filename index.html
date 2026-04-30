@@ -515,7 +515,10 @@
     zoom: 2,
     autoStart: true,
     autoLoadTapes: true,
-    openUrl: 'card.tap',
+    // Cache-bust: append a per-load token so browsers can't serve a stale
+    // card.tap from local cache when we push a new one. GitHub Pages sets
+    // max-age=600 on .tap, which would otherwise hold the old one for 10 min.
+    openUrl: 'card.tap?v=' + Date.now(),
     keyboardEventRoot: document,
   });
 
