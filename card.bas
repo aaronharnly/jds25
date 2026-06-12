@@ -1,4 +1,4 @@
-REM === JDS - 25 YEARS AT AMPLIFY ===
+REM === JDS - BIRTHDAY EDITION ===
 
 REM ============================================================
 REM  STAGE 1: QUINE INTRO
@@ -16,7 +16,7 @@ PAUSE 60
 PRINT
 PAUSE 20
 
-typeSrc("REM === JDS - 25 YEARS ===")
+typeSrc("REM === JDS - BIRTHDAY ===")
 typeSrc("")
 typeSrc("BORDER 0")
 typeSrc("PAPER 0")
@@ -37,9 +37,9 @@ typeSrc("END ASM")
 typeSrc("")
 typeSrc("PAUSE 200")
 typeSrc("")
-typeSrc("runSelfCheck")
+typeSrc("runBirthdayCheck")
 typeSrc("")
-typeSrc("showFinalMessage")
+typeSrc("incrementAge")
 typeSrc("END")
 
 PAUSE 40
@@ -90,12 +90,10 @@ PAUSE 50
 REM ---- Stat lines: each label appears, dot leader animates,
 REM      value area scrambles random chars, then settles. ----
 
-REM L'OBJET EST SUJET --> 0 --> 1
-labelDots(17, "L'OBJET EST SUJET")
-noiseValue(17, 8)
-showVal(17, "0", 7)
-PAUSE 70
-showVal(17, "1", 4)
+REM AGE --> scrambles, then declines to answer
+labelDots(17, "AGE")
+noiseValue(17, 12)
+showVal(17, "N/A", 7)
 BEEP 0.04, 6
 PAUSE 20
 
@@ -106,13 +104,13 @@ showVal(18, "0", 7)
 BEEP 0.03, -3
 PAUSE 20
 
-REM BS TOLERANCE --> 0 --> -1 (the curmudgeon corrects himself)
-labelDots(19, "BS TOLERANCE")
+REM CAKE TOLERANCE --> 0 --> 1 (one slice. fine.)
+labelDots(19, "CAKE TOLERANCE")
 noiseValue(19, 8)
 showVal(19, "0", 7)
 PAUSE 70
-showVal(19, "-1", 2)
-BEEP 0.04, -10
+showVal(19, "1", 4)
+BEEP 0.04, 4
 PAUSE 20
 
 REM LISP AFFINITY --> 95
@@ -129,17 +127,19 @@ showVal(21, "99", 6)
 BEEP 0.04, 10
 PAUSE 20
 
-REM GENIUS --> 100, rapidly increases to 255
-labelDots(22, "GENIUS")
+REM CANDLE COUNT --> counts up, hits UByte ceiling, overflows
+labelDots(22, "CANDLE COUNT")
 noiseValue(22, 8)
 showVal(22, "100", 3): PAUSE 5
-showVal(22, "120", 3): PAUSE 4
 showVal(22, "150", 3): PAUSE 4
-showVal(22, "190", 3): PAUSE 3
-showVal(22, "220", 3): PAUSE 3
+showVal(22, "200", 3): PAUSE 4
 showVal(22, "240", 3): PAUSE 3
-showVal(22, "255", 3)
-BEEP 0.06, 14
+showVal(22, "250", 3): PAUSE 3
+showVal(22, "254", 3): PAUSE 3
+showVal(22, "255", 3): PAUSE 10
+INK 2: FLASH 1: PRINT AT 22, 28; " OVF";
+FLASH 0
+BEEP 0.06, -14
 PAUSE 20
 
 REM ODDITY LEVEL --> long scramble of symbols, eventually INF.
@@ -169,18 +169,17 @@ NEXT rr
 PAUSE 50
 
 REM ---- Final message: typed character by character.
-REM      The middle line wraps onto two visual rows so the
-REM      "STILL ___ING" parallelism is preserved.
+REM      He is a Common Lisp loyalist; the card speaks his tongue.
+REM      Age stays undisclosed -- he seeks not attention.
 
-typeLine(17, 0, "> STILL CURIOUS", 4, 4)
+typeLine(17, 0, "> (incf age)", 4, 4)
 PAUSE 35
-typeLine(19, 0, "> STILL PURSUING THE WEIRD", 6, 6)
-typeLine(20, 8, "AND WONDERFUL", 6, 6)
+typeLine(19, 0, "> ; RESULT: STILL MESOZOIC", 6, 6)
 PAUSE 35
-typeLine(22, 0, "> STILL INSPIRING BRIGHT MINDS", 3, 9)
+typeLine(21, 0, "> HAPPY BIRTHDAY ANYWAY.", 3, 9)
 
 REM Final cursor that blinks via the FLASH attribute, forever.
-INK 3: FLASH 1: PRINT AT 22, 30; "_";
+INK 3: FLASH 1: PRINT AT 21, 24; "_";
 FLASH 0
 
 REM Sit. Don't loop. Don't summon attention.

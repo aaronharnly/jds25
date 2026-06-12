@@ -71,6 +71,7 @@ FONT_5x7 = {
     '8': ["01110","10001","10001","01110","10001","10001","01110"],
     '9': ["01110","10001","10001","01111","00001","00001","01110"],
     '-': ["00000","00000","00000","11111","00000","00000","00000"],
+    '+': ["00000","00100","00100","11111","00100","00100","00000"],
     '.': ["00000","00000","00000","00000","00000","00000","00100"],
     ':': ["00000","00100","00000","00000","00000","00100","00000"],
     ' ': ["00000","00000","00000","00000","00000","00000","00000"],
@@ -139,7 +140,7 @@ def main():
     # placing y=1 means glyphs span y=1..14 — well within the 16-px strip,
     # so no glyph leaks into row 2 where the avatar/title attributes live.
     draw.rectangle([0, 0, W - 1, 15], fill=0)
-    banner = "AMPLIFY  SILVER 25th"
+    banner = "AMPLIFY  BIRTHDAY ROM"
     bw = text_width(banner, 2)
     draw_text(canvas, banner, (W - bw) // 2, 1, scale=2, color=255)
 
@@ -158,12 +159,12 @@ def main():
     title_x = 116
     # "JDS" big — scale 4 -> 5*4=20 wide per char, 7*4=28 tall
     draw_text(canvas, "JDS", title_x, 22, scale=4, color=0)
-    # "LEVEL 25" — scale 2
-    draw_text(canvas, "LEVEL 25", title_x, 60, scale=2, color=0)
+    # "LEVEL UP" — scale 2
+    draw_text(canvas, "LEVEL UP", title_x, 60, scale=2, color=0)
     # Underline
-    draw.rectangle([title_x, 76, title_x + text_width("LEVEL 25", 2), 78], fill=0)
-    # "2001-2026" — scale 2
-    draw_text(canvas, "2001-2026", title_x, 84, scale=2, color=0)
+    draw.rectangle([title_x, 76, title_x + text_width("LEVEL UP", 2), 78], fill=0)
+    # "+1 ORBIT" — scale 2 (age undisclosed, by design)
+    draw_text(canvas, "+1 ORBIT", title_x, 84, scale=2, color=0)
 
     # Decorative pixel "stars" / sparkles around title
     for sx, sy in [(110, 28), (240, 32), (108, 96), (242, 96), (170, 100)]:
