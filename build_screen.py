@@ -140,7 +140,7 @@ def main():
     # placing y=1 means glyphs span y=1..14 — well within the 16-px strip,
     # so no glyph leaks into row 2 where the avatar/title attributes live.
     draw.rectangle([0, 0, W - 1, 15], fill=0)
-    banner = "AMPLIFY  BIRTHDAY ROM"
+    banner = "HAPPY BIRTHDAY"
     bw = text_width(banner, 2)
     draw_text(canvas, banner, (W - bw) // 2, 1, scale=2, color=255)
 
@@ -159,12 +159,10 @@ def main():
     title_x = 116
     # "JDS" big — scale 4 -> 5*4=20 wide per char, 7*4=28 tall
     draw_text(canvas, "JDS", title_x, 22, scale=4, color=0)
-    # "LEVEL UP" — scale 2
-    draw_text(canvas, "LEVEL UP", title_x, 60, scale=2, color=0)
+    # "LEVEL UP" — scale 2 (no year/orbit line: age is nobody's business)
+    draw_text(canvas, "LEVEL UP", title_x, 66, scale=2, color=0)
     # Underline
-    draw.rectangle([title_x, 76, title_x + text_width("LEVEL UP", 2), 78], fill=0)
-    # "+1 ORBIT" — scale 2 (age undisclosed, by design)
-    draw_text(canvas, "+1 ORBIT", title_x, 84, scale=2, color=0)
+    draw.rectangle([title_x, 82, title_x + text_width("LEVEL UP", 2), 84], fill=0)
 
     # Decorative pixel "stars" / sparkles around title
     for sx, sy in [(110, 28), (240, 32), (108, 96), (242, 96), (170, 100)]:
@@ -174,8 +172,11 @@ def main():
         draw.rectangle([sx + 1, sy + 2, sx + 1, sy + 2], fill=0)
         draw.rectangle([sx + 1, sy - 1, sx + 1, sy - 1], fill=0)
 
-    # ---- ROW OF HEARTS (row 14, y 112..119): 25 of them ----
-    # Tiny 4x4 heart sprite, 5px stride, repeated 25 times.
+    # ---- HEARTS (rows 14-15, y 112..127): 57 of them ----
+    # One per year, but nobody says so out loud. He counts; that's the point.
+    # 57 won't fit in one 256-px row at stride 5, so: two centered rows,
+    # 29 + 28, brick-offset. Row 1 sits inside attr row 14 (y 112..119),
+    # row 2 inside attr row 15 (y 120..127) — no cell straddling, no clash.
     heart = [
         "01010",
         "11111",
@@ -183,20 +184,19 @@ def main():
         "01110",
         "00100",
     ]
-    # 25 hearts * (4 + 1) = 125 px wide; centre across 256
     stride = 5
-    n_hearts = 25
-    total_w = n_hearts * stride - 1
-    hx0 = (W - total_w) // 2
-    hy0 = 114
-    for i in range(n_hearts):
-        for r, row in enumerate(heart):
-            for c, b in enumerate(row):
-                if b == '1':
-                    canvas.putpixel((hx0 + i * stride + c, hy0 + r), 0)
 
-    # ---- DIVIDER LINE (row 15, y 120..127) ----
-    draw.line([(0, 124), (W - 1, 124)], fill=0, width=1)
+    def heart_row(n: int, hy0: int):
+        total_w = n * stride - 1
+        hx0 = (W - total_w) // 2
+        for i in range(n):
+            for r, row in enumerate(heart):
+                for c, b in enumerate(row):
+                    if b == '1':
+                        canvas.putpixel((hx0 + i * stride + c, hy0 + r), 0)
+
+    heart_row(29, 113)
+    heart_row(28, 120)
 
     # Below row 15 left blank for BASIC PRINT.
 
@@ -229,7 +229,8 @@ def main():
                 # bottom half of each glyph collides with the title-area attrs
                 # below, rendering as black-on-black.
                 attrs[idx] = ATTR_BANNER
-            elif cell_y == 14:
+            elif 14 <= cell_y <= 15:
+                # Both rows are hearts now (two stacked rows of 29 + 28)
                 attrs[idx] = ATTR_HEARTS
             elif 2 <= cell_y <= 13:
                 # Avatar cells (cols 1..12) get paper-black ink-white
@@ -237,8 +238,6 @@ def main():
                     attrs[idx] = ATTR_AVATAR
                 else:
                     attrs[idx] = ATTR_TITLE_AREA
-            elif cell_y == 15:
-                attrs[idx] = ATTR_LABEL  # divider
             else:
                 # Bottom rows 16..23 are runtime PRINT canvas — start neutral.
                 # card.bas overwrites attributes per cell as it prints.
