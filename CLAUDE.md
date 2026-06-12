@@ -86,6 +86,47 @@ missing; `build_screen.py` expects a roughly square 1:1 photo at that path.
 LinkedIn (`linkedin.com/in/johndanielstewart/`) returns 404 for
 WebFetch — don't waste a turn re-trying it.
 
+## Branches
+
+- `main` — the original 25-year anniversary card.
+- `birthday` — birthday variant (HAPPY BIRTHDAY splash, 57 hearts = his
+  age uncounted-out-loud, youthfulness/candle-overflow selfcheck,
+  `(incf age)` finale signed "- AARON").
+
+## Publishing (web)
+
+- **Public repo**: `github.com/aaronharnly/jds-card` (renamed from
+  `jds25`). Gets **deliverables only**: `card.tap`, `index.html`,
+  `jsspeccy/`. NEVER push this source repo there — CLAUDE.md/README
+  contain Slack-mined personal notes.
+- Live page: `https://aaronharnly.github.io/jds-card/` (GitHub Pages,
+  main branch, root). Old `…/jds25/` Pages URL is dead (Pages doesn't
+  redirect renames); old raw.githubusercontent `jds25` URLs still work.
+- Publish loop: build → `cp card.tap index.html /tmp/jds25-publish/` →
+  commit/push there (HTTPS + gh credential helper). If the clone is
+  missing: `git clone https://github.com/aaronharnly/jds-card.git`.
+  Pages deploys in ~1-2 min; verify with an md5 poll, not eyeballs.
+- `gh` CLI is authed (aaronharnly); SSH key also works.
+- qaop fallback link:
+  `https://torinak.com/qaop/#l=https://raw.githubusercontent.com/aaronharnly/jds-card/main/card.tap`
+
+## Web page (index.html) hard-won facts
+
+- The `JSSpeccy()` factory returns ONLY `{openUrl, setZoom, onReady,
+  exit, fullscreen…}` — no start/pause, no internal Emulator access.
+  Working audio requires starting inside a user gesture, so the page
+  uses JSSpeccy's own start button stretched invisibly over the screen
+  ("CLICK TO SWITCH ON"). Don't reintroduce `autoStart`.
+- The menu bar nests inside the canvas's parent — find the start button
+  with `:scope > button`, not `querySelector('button')`.
+- Don't schedule one-shot UI fixup with requestAnimationFrame (stalls in
+  hidden tabs); tidy() runs synchronously post-factory.
+- Cache-freshness: `fetch('card.tap', {cache:'reload'})` primes the HTTP
+  cache before the emulator's own fetch of the same URL.
+- zxbc may not be on PATH: `/opt/miniconda3/bin/zxbc`.
+- zxbasic strings are 0-indexed — see typeSrc/typeLine in card.bas.
+- Local preview: `.claude/launch.json` serves the dir on :8765.
+
 ## Don't
 
 - Don't add a sentimental message. JDS will hate it.
