@@ -75,6 +75,10 @@ FONT_5x7 = {
     ':': ["00000","00100","00000","00000","00000","00100","00000"],
     ' ': ["00000","00000","00000","00000","00000","00000","00000"],
     '/': ["00000","00001","00010","00100","01000","10000","00000"],
+    "'": ["00100","00100","00100","00000","00000","00000","00000"],
+    # lowercase letters used in the banner ("th" of "25th")
+    't': ["01000","01000","11110","01000","01000","01000","00111"],
+    'h': ["10000","10000","11110","10001","10001","10001","10001"],
 }
 
 
@@ -83,7 +87,9 @@ def draw_text(canvas: Image.Image, text: str, x: int, y: int, scale: int, color:
     px = canvas.load()
     cur_x = x
     for ch in text:
-        glyph = FONT_5x7.get(ch.upper(), FONT_5x7[' '])
+        # try the literal character first (preserves lowercase glyphs),
+        # then fall back to uppercase, then to space
+        glyph = FONT_5x7.get(ch, FONT_5x7.get(ch.upper(), FONT_5x7[' ']))
         for row, bits in enumerate(glyph):
             for col, bit in enumerate(bits):
                 if bit == '1':
@@ -129,11 +135,13 @@ def main():
     draw = ImageDraw.Draw(canvas)
 
     # ---- TOP BANNER (rows 0..1, y 0..15) ----
-    # Solid black strip with white text "AMPLIFY ENT. SYSTEM"
+    # Two attribute rows = 16 px tall. Text glyphs at scale=2 are 14 px tall;
+    # placing y=1 means glyphs span y=1..14 — well within the 16-px strip,
+    # so no glyph leaks into row 2 where the avatar/title attributes live.
     draw.rectangle([0, 0, W - 1, 15], fill=0)
-    banner = "AMPLIFY ENT. SYSTEM"
-    bw = text_width(banner, 1) * 2
-    draw_text(canvas, banner, (W - bw) // 2, 4, scale=2, color=255)
+    banner = "AMPLIFY  SILVER 25th"
+    bw = text_width(banner, 2)
+    draw_text(canvas, banner, (W - bw) // 2, 1, scale=2, color=255)
 
     # ---- AVATAR (rows 2..13, y 16..111: 96x96 px in cells (1..12, 2..13)) ----
     AV_SIZE = 96
@@ -214,11 +222,15 @@ def main():
     for cell_y in range(24):
         for cell_x in range(32):
             idx = cell_y * 32 + cell_x
-            if cell_y == 0:
+            if cell_y <= 1:
+                # The banner glyphs span 14 px (scale 2), filling cell rows 0 AND 1.
+                # Both rows must use ATTR_BANNER (red paper, white ink) or the
+                # bottom half of each glyph collides with the title-area attrs
+                # below, rendering as black-on-black.
                 attrs[idx] = ATTR_BANNER
             elif cell_y == 14:
                 attrs[idx] = ATTR_HEARTS
-            elif 1 <= cell_y <= 13:
+            elif 2 <= cell_y <= 13:
                 # Avatar cells (cols 1..12) get paper-black ink-white
                 if 1 <= cell_x <= 12:
                     attrs[idx] = ATTR_AVATAR
@@ -227,13 +239,9 @@ def main():
             elif cell_y == 15:
                 attrs[idx] = ATTR_LABEL  # divider
             else:
-                # Bottom rows used by PRINT — colour by row
-                # 16..23 — labels in cyan, values in white. We'll keep simple: all black/white bright.
+                # Bottom rows 16..23 are runtime PRINT canvas — start neutral.
+                # card.bas overwrites attributes per cell as it prints.
                 attrs[idx] = ATTR_VALUE
-    # Splash a couple of color accents in the bottom (rows 17, 19 etc) using LABEL color for first 9 cols
-    for cell_y in (16, 17, 18, 19, 20):
-        for cell_x in range(0, 11):
-            attrs[cell_y * 32 + cell_x] = ATTR_LABEL
 
     with open(OUT_PATH, "wb") as f:
         f.write(pixels + attrs)
