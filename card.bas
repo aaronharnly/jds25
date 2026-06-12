@@ -90,11 +90,17 @@ PAUSE 50
 REM ---- Stat lines: each label appears, dot leader animates,
 REM      value area scrambles random chars, then settles. ----
 
-REM AGE --> scrambles, then declines to answer
-labelDots(17, "AGE")
-noiseValue(17, 12)
-showVal(17, "N/A", 7)
-BEEP 0.04, 6
+REM YOUTHFULNESS OF MIND --> counts up to a perfect score
+labelDots(17, "YOUTHFULNESS OF MIND")
+noiseValue(17, 8)
+showVal(17, "10", 3): PAUSE 5
+showVal(17, "30", 3): PAUSE 4
+showVal(17, "55", 3): PAUSE 4
+showVal(17, "75", 3): PAUSE 3
+showVal(17, "90", 3): PAUSE 3
+showVal(17, "97", 3): PAUSE 3
+showVal(17, "100", 4)
+BEEP 0.04, 12
 PAUSE 20
 
 REM POMP TOLERANCE --> 0
@@ -104,13 +110,11 @@ showVal(18, "0", 7)
 BEEP 0.03, -3
 PAUSE 20
 
-REM CAKE TOLERANCE --> 0 --> 1 (one slice. fine.)
+REM CAKE TOLERANCE --> 0, no appeal
 labelDots(19, "CAKE TOLERANCE")
 noiseValue(19, 8)
 showVal(19, "0", 7)
-PAUSE 70
-showVal(19, "1", 4)
-BEEP 0.04, 4
+BEEP 0.03, -5
 PAUSE 20
 
 REM LISP AFFINITY --> 95
