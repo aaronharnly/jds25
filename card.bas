@@ -193,12 +193,16 @@ REM ============= subroutines =============
 REM Type one line of "source code" onto the listing screen.
 REM Char-by-char with a small pause every 4 chars so it reads as
 REM typing rather than instant LIST output. Empty string = blank line.
+REM NB: zxbasic strings are 0-indexed (unlike Sinclair BASIC), so the
+REM loop runs 0..LEN-1; a 1-based loop silently eats the first char.
 SUB typeSrc(line$ AS STRING)
     DIM j AS UByte
-    FOR j = 1 TO LEN(line$)
-        PRINT line$(j TO j);
-        IF (j BAND 3) = 0 THEN PAUSE 1
-    NEXT j
+    IF LEN(line$) > 0 THEN
+        FOR j = 0 TO LEN(line$) - 1
+            PRINT line$(j TO j);
+            IF ((j + 1) BAND 3) = 0 THEN PAUSE 1
+        NEXT j
+    END IF
     PRINT
 END SUB
 
@@ -236,11 +240,12 @@ SUB showVal(row AS UByte, val$ AS STRING, color AS UByte)
 END SUB
 
 REM Type a string char-by-char with a faint per-key click.
+REM 0-based string indexing (zxbasic default) — see typeSrc note.
 SUB typeLine(row AS UByte, col AS UByte, line$ AS STRING, color AS UByte, pitch AS Byte)
     INK color: PAPER 0: BRIGHT 1
     DIM j AS UByte
-    FOR j = 1 TO LEN(line$)
-        PRINT AT row, col + j - 1; line$(j TO j);
+    FOR j = 0 TO LEN(line$) - 1
+        PRINT AT row, col + j; line$(j TO j);
         BEEP 0.008, pitch
         PAUSE 4
     NEXT j
