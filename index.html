@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>JDS — 25 Years</title>
+<title>JDS — Happy Birthday</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -386,6 +386,29 @@
     pointer-events: none;
   }
 
+  /* "Switch on" prompt — phosphor-green idle glow on the dead tube.
+     pointer-events: none so clicks fall through to JSSpeccy's (invisible,
+     screen-filling) start button underneath. Hidden by JS on first click. */
+  .switch-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'VT323', monospace;
+    font-size: 30px;
+    letter-spacing: 3px;
+    color: #7bd66b;
+    text-shadow: 0 0 12px rgba(123, 214, 107, 0.8), 0 0 30px rgba(123, 214, 107, 0.35);
+    z-index: 35;
+    pointer-events: none;
+    animation: phosphor-blink 1.6s ease-in-out infinite;
+  }
+  @keyframes phosphor-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
   /* Footer caption */
   .caption {
     margin-top: 24px;
@@ -436,6 +459,7 @@
     <div class="screen-bezel">
       <div class="screen">
         <div id="jsspeccy"></div>
+        <div class="switch-label" id="switch-label">CLICK TO SWITCH ON</div>
       </div>
     </div>
     <div class="knobs" aria-hidden="true">
@@ -501,20 +525,25 @@
   </div>
 
   <div class="caption">
-    JDS — twenty-five years.<br>
-    <span class="quiet">click the screen for sound · use the real keys</span>
+    JDS — happy birthday.<br>
+    <span class="quiet">click the telly to switch it on · then use the real keys</span>
   </div>
 
 </div>
 
 <script src="jsspeccy/jsspeccy.js"></script>
 <script>
-  // The JSSpeccy() factory returns a small public API (openUrl, start,
-  // pause, setZoom, exit, enterFullscreen) — NOT the internal Emulator
-  // instance, so internal methods like openTAPFile/isReady are not
-  // reachable from here. We therefore use the supported constructor
-  // flow: openUrl + autoStart + autoLoadTapes, with a plain extension
-  // ('card.tap', no query string) so its endsWith('.tap') sniff passes.
+  // The JSSpeccy() factory returns only a small public API (openUrl,
+  // setZoom, onReady, exit, fullscreen controls) — there is NO public
+  // start()/pause(), and the internal Emulator is unreachable. So the
+  // only way to start emulation inside a user gesture (which browser
+  // autoplay policy requires for working audio) is JSSpeccy's own start
+  // button, whose click handler calls the internal emulator.start().
+  //
+  // Therefore: no autoStart. We keep their start button, stretch it
+  // invisibly over the whole screen (the telly itself becomes the power
+  // switch), and draw our own blinking CLICK TO SWITCH ON label under it.
+  // First click = start + audio, both born inside the gesture.
   //
   // Cache freshness: GitHub Pages serves card.tap with max-age=600, so a
   // recipient who reloads after we push could get a stale tape. Before
@@ -522,47 +551,58 @@
   // which bypasses the HTTP cache AND rewrites the entry — JSSpeccy's own
   // fetch('card.tap') a moment later reads that just-refreshed entry.
   const host = document.getElementById('jsspeccy');
-  let emu = null;
   fetch('card.tap', { cache: 'reload' })
     .catch(() => { /* offline/etc — let JSSpeccy fetch whatever it can */ })
     .then(() => {
-      emu = JSSpeccy(host, {
+      JSSpeccy(host, {
         machine: 48,
         zoom: 2,
-        autoStart: true,
         autoLoadTapes: true,
         openUrl: 'card.tap',
         keyboardEventRoot: document,
       });
-      requestAnimationFrame(tidy);
+      // The factory builds its DOM synchronously, so tidy() can run right
+      // away. (Don't use requestAnimationFrame here: it stalls in hidden
+      // or background tabs; tidy's own retry uses setTimeout instead.)
+      tidy();
     });
 
-  // After JSSpeccy builds its UI, hide everything except the canvas,
-  // and stretch the canvas to fill the TV's screen rectangle.
+  // After JSSpeccy builds its UI: hide the menu bar and dialogs, stretch
+  // the canvas to fill the TV screen, and convert the start button into
+  // an invisible full-screen power switch.
   function tidy() {
     const canvas = host.querySelector('canvas');
-    if (!canvas) { requestAnimationFrame(tidy); return; }
-    // Hide siblings of canvas-containing branches (toolbar, dialogs, menus, start button).
+    if (!canvas) { setTimeout(tidy, 100); return; }
+    // Hide siblings of the canvas-containing branch (menu bar, dialogs).
     Array.from(host.children).forEach((child) => {
       if (!child.contains(canvas)) child.style.display = 'none';
     });
-    // Inside the canvas's parent, hide non-canvas siblings (e.g., start button).
     const parent = canvas.parentElement;
+    // The start button is the only DIRECT-child <button> of the canvas's
+    // parent — plain querySelector('button') would match the File menu
+    // button, because the menu bar nests inside this same container.
+    const startBtn = parent.querySelector(':scope > button');
+    // Hide other non-canvas siblings, but keep the start button alive.
     Array.from(parent.children).forEach((sib) => {
-      if (sib !== canvas) sib.style.display = 'none';
+      if (sib !== canvas && sib !== startBtn) sib.style.display = 'none';
     });
     parent.style.width = '100%';
     parent.style.height = '100%';
+    if (startBtn) {
+      // Full-screen, invisible, still clickable. JSSpeccy hides it on
+      // 'start' by itself; we just hide our label alongside.
+      Object.assign(startBtn.style, {
+        top: '0', left: '0', width: '100%', height: '100%',
+        margin: '0', opacity: '0', cursor: 'pointer', zIndex: '40',
+        borderRadius: '0',
+      });
+      startBtn.setAttribute('aria-label', 'Switch on the television');
+      startBtn.addEventListener('click', () => {
+        const label = document.getElementById('switch-label');
+        if (label) label.style.display = 'none';
+      });
+    }
   }
-
-  // Audio policy: browsers refuse to start an AudioContext outside a user
-  // gesture, and autoStart runs without one — so emulation begins silent.
-  // The public API exposes pause()/start(), and Emulator.start() builds a
-  // brand-new AudioContext via AudioHandler.start(); doing that inside a
-  // click gesture satisfies the autoplay policy and sound comes alive.
-  document.body.addEventListener('click', () => {
-    try { if (emu) { emu.pause(); emu.start(); } } catch (_) {}
-  }, { once: true });
 </script>
 
 </body>
