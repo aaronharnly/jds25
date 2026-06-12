@@ -180,10 +180,13 @@ typeLine(17, 0, "> (incf age)", 4, 4)
 PAUSE 35
 typeLine(19, 0, "> ; RESULT: STILL MESOZOIC", 6, 6)
 PAUSE 35
-typeLine(21, 0, "> HAPPY BIRTHDAY ANYWAY.", 3, 9)
+typeLine(21, 0, "> HAPPY BIRTHDAY WITH LOVE", 3, 9)
+typeLine(22, 2, "AND AFFECTION", 3, 9)
+PAUSE 35
+typeLine(23, 18, "- AARON", 7, 12)
 
 REM Final cursor that blinks via the FLASH attribute, forever.
-INK 3: FLASH 1: PRINT AT 21, 24; "_";
+INK 7: FLASH 1: PRINT AT 23, 26; "_";
 FLASH 0
 
 REM Sit. Don't loop. Don't summon attention.
