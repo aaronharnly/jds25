@@ -509,34 +509,33 @@
 
 <script src="jsspeccy/jsspeccy.js"></script>
 <script>
+  // The JSSpeccy() factory returns a small public API (openUrl, start,
+  // pause, setZoom, exit, enterFullscreen) — NOT the internal Emulator
+  // instance, so internal methods like openTAPFile/isReady are not
+  // reachable from here. We therefore use the supported constructor
+  // flow: openUrl + autoStart + autoLoadTapes, with a plain extension
+  // ('card.tap', no query string) so its endsWith('.tap') sniff passes.
+  //
+  // Cache freshness: GitHub Pages serves card.tap with max-age=600, so a
+  // recipient who reloads after we push could get a stale tape. Before
+  // constructing the emulator we fetch the same URL with cache:'reload',
+  // which bypasses the HTTP cache AND rewrites the entry — JSSpeccy's own
+  // fetch('card.tap') a moment later reads that just-refreshed entry.
   const host = document.getElementById('jsspeccy');
-  const emu = JSSpeccy(host, {
-    machine: 48,
-    zoom: 2,
-    autoLoadTapes: true,
-    keyboardEventRoot: document,
-    // Note: deliberately NOT passing `openUrl` or `autoStart` here.
-    // JSSpeccy's openUrl sniffs the file type with `url.endsWith('.tap')`,
-    // which breaks if we tack on a `?v=…` cache-buster — so instead we
-    // fetch the tape ourselves below with `cache: 'no-cache'` and hand
-    // the bytes directly to the lower-level `openTAPFile()` method,
-    // which doesn't do any URL sniffing.
-  });
-
-  function loadTapeNow() {
-    fetch('card.tap', { cache: 'no-cache' })
-      .then(r => r.arrayBuffer())
-      .then(buf => {
-        emu.openTAPFile(buf);
-        emu.start();
-      })
-      .catch(err => console.error('tape fetch failed:', err));
-  }
-  if (emu.isReady) {
-    loadTapeNow();
-  } else {
-    emu.onReadyHandlers.push(loadTapeNow);
-  }
+  let emu = null;
+  fetch('card.tap', { cache: 'reload' })
+    .catch(() => { /* offline/etc — let JSSpeccy fetch whatever it can */ })
+    .then(() => {
+      emu = JSSpeccy(host, {
+        machine: 48,
+        zoom: 2,
+        autoStart: true,
+        autoLoadTapes: true,
+        openUrl: 'card.tap',
+        keyboardEventRoot: document,
+      });
+      requestAnimationFrame(tidy);
+    });
 
   // After JSSpeccy builds its UI, hide everything except the canvas,
   // and stretch the canvas to fill the TV's screen rectangle.
@@ -555,12 +554,14 @@
     parent.style.width = '100%';
     parent.style.height = '100%';
   }
-  requestAnimationFrame(tidy);
 
-  // Audio policy: most browsers require a user gesture before audio plays.
-  // We tell users via the caption; on click anywhere, kickstart audio.
+  // Audio policy: browsers refuse to start an AudioContext outside a user
+  // gesture, and autoStart runs without one — so emulation begins silent.
+  // The public API exposes pause()/start(), and Emulator.start() builds a
+  // brand-new AudioContext via AudioHandler.start(); doing that inside a
+  // click gesture satisfies the autoplay policy and sound comes alive.
   document.body.addEventListener('click', () => {
-    try { emu.audioHandler && emu.audioHandler.start(); } catch (_) {}
+    try { if (emu) { emu.pause(); emu.start(); } } catch (_) {}
   }, { once: true });
 </script>
 
